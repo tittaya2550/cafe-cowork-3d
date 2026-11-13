@@ -7,7 +7,7 @@
   if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false;
 
   var LOT = window.LOT, SITE = window.SITE, LV = window.LEVELS;
-  var st = { l2: true, roof: true, cars: true, labels: true, month: 11, hour: 15.5, view: 'iso' };
+  var st = { l2: true, roof: true, cars: true, labels: true, night: false, month: 11, hour: 15.5, view: 'iso' };
 
   // ---------- renderer / scene / camera ----------
   var renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -105,6 +105,11 @@
     rug: function () { return std({ map: noise('#B9B0A2', 0.22, 0.5, 1), roughness: 1 }); },
     art: function () { return std({ color: '#C7A47C', roughness: 0.8 }); },
     lamp: function () { return window.PROPS.lamp; },
+    neon: function () { return new THREE.MeshStandardMaterial({ color: '#FF8FB3', emissive: '#FF2E78', emissiveIntensity: 2.6, roughness: 0.4 }); },
+    amber: function () { return new THREE.MeshStandardMaterial({ color: '#FFD9A0', emissive: '#FFA63D', emissiveIntensity: 2.2, roughness: 0.4 }); },
+    bottleG: function () { return std({ color: '#2F6B45', roughness: 0.12, metalness: 0.2 }); },
+    bottleA: function () { return std({ color: '#8A4B1F', roughness: 0.12, metalness: 0.2 }); },
+    bottleC: function () { return std({ color: '#C9D4D6', roughness: 0.08, metalness: 0.3 }); },
     red: function () { return std({ color: '#C0281F', roughness: 0.4 }); },
     sign: function () {
       var c = document.createElement('canvas'); c.width = 600; c.height = 120; var g = c.getContext('2d');
@@ -158,7 +163,7 @@
 
   // ---------- build scene from model data ----------
   var groups = {};
-  ['site', 'cars', 'l1', 'l2', 'roof'].forEach(function (n) { groups[n] = new THREE.Group(); scene.add(groups[n]); });
+  ['site', 'cars', 'l1', 'l2', 'roof', 'night'].forEach(function (n) { groups[n] = new THREE.Group(); scene.add(groups[n]); });
   var model = window.buildModel();
   model.items.forEach(function (it) {
     if (it.t === 'prop') {
@@ -174,6 +179,7 @@
       mesh = new THREE.Mesh(soft ? new THREE.RoundedBoxGeometry(it.w, it.h, it.d, 3, 0.05) : boxGeo(it.w, it.h, it.d), m);
       mesh.position.copy(P(it.x + it.w / 2, it.y + it.d / 2, it.z + it.h / 2));
       if (it.rx) mesh.rotation.x = it.rx;
+      if (it.rz) mesh.rotation.z = it.rz;
     } else if (it.t === 'cyl') {
       mesh = new THREE.Mesh(new THREE.CylinderGeometry(it.r * 0.85, it.r, it.h, 10), m);
       mesh.position.copy(P(it.x, it.y, it.z + it.h / 2));
@@ -181,7 +187,7 @@
       mesh = new THREE.Mesh(new THREE.IcosahedronGeometry(it.r, 1), m);
       mesh.position.copy(P(it.x, it.y, it.z));
     }
-    var isGlass = it.m === 'glass' || it.m === 'lamp', isGround = it.t === 'box' && it.h <= 0.1 && it.z === 0;
+    var isGlass = it.m === 'glass' || it.m === 'lamp' || it.m === 'neon' || it.m === 'amber', isGround = it.t === 'box' && it.h <= 0.1 && it.z === 0;
     mesh.castShadow = !isGlass && !isGround;
     mesh.receiveShadow = !isGlass;
     if (isGlass) mesh.renderOrder = 2;
@@ -196,12 +202,12 @@
     head.rotation.x = -Math.PI / 2; head.position.z = -2; head.scale.y = 1; head.scale.z = 0.08;
     var disc = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 2.9, 0.04, 48), std({ color: '#F4F2EC', roughness: 0.9 }));
     g.add(disc, shaft, head);
-    g.position.copy(P(21.5, 6, 0.06)); shaft.position.y = head.position.y = 0.05;
+    g.position.copy(P(LOT.width + 5.5, 9, 0.06)); shaft.position.y = head.position.y = 0.05;
     g.rotation.y = SITE.facing * Math.PI / 180;   // -Z (toward the road) rotated onto true north
     g.traverse(function (o) { o.receiveShadow = true; });
     groups.site.add(g);
     var n = SITE.facing * Math.PI / 180;
-    model.labels.push({ t: 'N', x: 21.5 - Math.sin(n) * 3.6, y: 6 - Math.cos(n) * 3.6, z: 0.2, g: 'site', north: true });
+    model.labels.push({ t: 'N', x: LOT.width + 5.5 - Math.sin(n) * 3.6, y: 9 - Math.cos(n) * 3.6, z: 0.2, g: 'site', north: true });
   })();
 
   // ---------- sky + sun ----------
@@ -209,9 +215,9 @@
   var skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: { top: { value: new THREE.Color() }, bot: { value: new THREE.Color() }, sunDir: { value: new THREE.Vector3(0, 1, 0) }, glow: { value: new THREE.Color() },
-      cloud: { value: new THREE.Color() }, gnd: { value: new THREE.Color(0.52, 0.53, 0.44) } },
+      cloud: { value: new THREE.Color() }, gnd: { value: new THREE.Color(0.52, 0.53, 0.44) }, night: { value: 0 } },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: 'uniform vec3 top; uniform vec3 bot; uniform vec3 sunDir; uniform vec3 glow; uniform vec3 cloud; uniform vec3 gnd; varying vec3 vDir;' +
+    fragmentShader: 'uniform vec3 top; uniform vec3 bot; uniform vec3 sunDir; uniform vec3 glow; uniform vec3 cloud; uniform vec3 gnd; uniform float night; varying vec3 vDir;' +
       'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }' +
       'float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }' +
       'float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * vn(p); p = p * 2.03 + 7.1; a *= 0.5; } return v; }' +
@@ -219,6 +225,7 @@
       'float s = max(dot(d, normalize(sunDir)), 0.0);' +
       'if (d.y > 0.01) { vec2 uv = d.xz / (d.y + 0.14) * 1.15; float k = smoothstep(0.5, 0.8, fbm(uv + 3.7)) * smoothstep(0.01, 0.22, d.y); c = mix(c, cloud * (0.86 + 0.14 * fbm(uv * 3.0)), k * 0.8); }' +
       'c += glow * (pow(s, 600.0) * 1.5 + pow(s, 12.0) * 0.2);' +
+      'if (night > 0.5 && d.y > 0.04) { vec2 sg = floor(d.xz / (d.y + 0.25) * 170.0); c += vec3(0.85, 0.9, 1.0) * step(0.9982, hash(sg)) * (0.45 + 0.55 * hash(sg + 3.1)); }' +
       'c = mix(c, gnd, smoothstep(0.0, -0.06, d.y)); gl_FragColor = vec4(c, 1.0); }'
   });
   var sky = new THREE.Mesh(new THREE.SphereGeometry(800, 32, 16), skyMat); scene.add(sky);
@@ -231,10 +238,13 @@
   var sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 10; sc.far = 260;
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04;
   var pmrem = new THREE.PMREMGenerator(renderer), envRT = null, envTimer = null;
-  var lamps = [];
+  var lamps = [], nightLights = [];
+  [[8, 19, 2.7, 0xffc98a, 1.5, 13], [8.5, 28.6, 2.3, 0xff5a9a, 1.1, 7], [12.5, 23.5, 2.6, 0xffb060, 0.9, 9], [3.6, 25.4, 2.6, 0xffb060, 0.9, 9]].slice(0, small ? 2 : 4).forEach(function (d) {
+    var nl = new THREE.PointLight(d[3], d[4], d[5], 2); nl.position.copy(P(d[0] + window.BLDG.dx, d[1] + window.BLDG.dy, d[2])); nl.visible = false; groups.night.add(nl); nightLights.push(nl);
+  });
   [['l1', 5, 24.6, 2.9], ['l1', 11.2, 27.9, 2.6], ['l2', 6.3, 26.1, LV.F2 + 2.3], ['l2', 12.4, 26.5, LV.F2 + 2.3]].concat(small ? [] :
     [['l1', 11.4, 24.3, 2.9], ['l2', 5, 22.6, LV.F2 + 2.5], ['l2', 12.4, 22.6, LV.F2 + 2.5]]).forEach(function (d) {
-    var pl = new THREE.PointLight(0xffd6a0, 0, 12, 2); pl.position.copy(P(d[1], d[2], d[3])); groups[d[0]].add(pl); lamps.push(pl);
+    var pl = new THREE.PointLight(0xffd6a0, 0, 12, 2); pl.position.copy(P(d[1] + window.BLDG.dx, d[2] + window.BLDG.dy, d[3])); groups[d[0]].add(pl); lamps.push(pl);
   });
 
   function compass(az) { return ['เหนือ', 'ตะวันออกเฉียงเหนือ', 'ตะวันออก', 'ตะวันออกเฉียงใต้', 'ใต้', 'ตะวันตกเฉียงใต้', 'ตะวันตก', 'ตะวันตกเฉียงเหนือ'][Math.round(az / 45) % 8]; }
@@ -262,8 +272,19 @@
     scene.fog.color.copy(su.bot.value);
     var dusk = 1 - Math.min(1, Math.max(0, (s.alt - 4) / 12));     // interior lights come on as the sun gets low
     window.PROPS.lamp.emissiveIntensity = 0.4 + 2.4 * dusk;
-    lamps.forEach(function (l) { l.intensity = 1.15 * dusk; });
+    lamps.forEach(function (l) { l.intensity = 1.15 * dusk; l.color.setHex(0xffd6a0); });
     renderer.toneMappingExposure = 0.5 + 0.12 * Math.min(1, up * 3);
+    su.night.value = st.night ? 1 : 0; su.gnd.value.setRGB(0.52, 0.53, 0.44);
+    if (st.night) {                              // cafe-and-bar evening: moonlight outside, warm lamps + neon inside
+      dir.set(0.35, 0.8, -0.48).normalize();
+      sun.position.copy(dir).multiplyScalar(120); sun.intensity = 0.32; sun.color.setRGB(0.55, 0.66, 1);
+      hemi.intensity = 0.07; su.sunDir.value.copy(dir);
+      su.top.value.setRGB(0.012, 0.02, 0.06); su.bot.value.setRGB(0.07, 0.075, 0.13); su.glow.value.setRGB(0.5, 0.55, 0.7);
+      su.cloud.value.setRGB(0.09, 0.1, 0.16); su.gnd.value.setRGB(0.03, 0.035, 0.04); scene.fog.color.setRGB(0.035, 0.04, 0.07);
+      window.PROPS.lamp.emissiveIntensity = 3.4; lamps.forEach(function (l) { l.intensity = 1.05; l.color.setHex(0xffb066); });
+      renderer.toneMappingExposure = 0.9;
+    }
+    nightLights.forEach(function (l) { l.visible = st.night; });
 
     // which facades get direct sun
     var lit = [];
@@ -271,7 +292,7 @@
       if (my < -0.12) lit.push('ด้านหน้า (ถนน)'); if (my > 0.12) lit.push('ด้านหลัง');
       if (mx < -0.12) lit.push('ด้านข้างทิศตะวันตก'); if (mx > 0.12) lit.push('ด้านข้างทิศตะวันออก');
     }
-    document.getElementById('sunOut').innerHTML = s.alt <= 0 ? 'ดวงอาทิตย์อยู่ใต้ขอบฟ้า' :
+    document.getElementById('sunOut').innerHTML = st.night ? '<b>โหมดกลางคืน · คาเฟ่แอนด์บาร์</b><br>ไฟในร้าน ไฟราวบนลานนั่ง ไฟนีออนหลังบาร์ และเทียนบนโต๊ะเปิดทั้งหมด' : s.alt <= 0 ? 'ดวงอาทิตย์อยู่ใต้ขอบฟ้า' :
       'ดวงอาทิตย์อยู่ทิศ<b>' + compass(s.az) + '</b> (' + s.az.toFixed(0) + '°) · มุมเงย <b>' + s.alt.toFixed(0) + '°</b><br>แดดส่องตรง: ' + lit.join(', ');
     document.getElementById('monthOut').textContent = '21 ' + MONTHS[st.month - 1];
     document.getElementById('hourOut').textContent = hhmm(st.hour) + ' น.';
@@ -321,14 +342,15 @@
   window.addEventListener('resize', resize);
 
   // ---------- views + toggles ----------
+  var BC = [8 + window.BLDG.dx - LOT.width / 2, 27.5 + window.BLDG.dy - LOT.depth / 2];   // building centre in three coords
   var VIEWS = {              // [camera offset from target], [target] in three coords
-    iso: [[-33, 25, -38], [0, 2, 2]],
-    front: [[3, 5, -47], [0, 3.2, 4]],
-    west: [[-42, 15, -8], [0, 3, 6]],
-    back: [[14, 17, 44], [0, 2, 4]],
-    top: [[0, 84, 0.01], [0, 0, 0]],
-    plan1: [[0, 41, 0.01], [0, 0, 8.5]],
-    plan2: [[0, 37, 0.01], [0, LV.F2, 8.5]]
+    iso: [[-30, 27, -40], [2, 2, 0]],
+    front: [[2, 6, -46], [3, 3.2, 1]],
+    west: [[-48, 15, -10], [3, 3, 1]],
+    back: [[10, 20, 46], [2, 2, 0]],
+    top: [[0, 52, 0.01], [0, 0, 0]],
+    plan1: [[0, 41, 0.01], [BC[0], 0, BC[1]]],
+    plan2: [[0, 37, 0.01], [BC[0], LV.F2, BC[1]]]
   };
   var settingView = false;
   function setView(name) {
@@ -349,7 +371,8 @@
     applyToggles();
   }
   function applyToggles() {
-    groups.l2.visible = st.l2; groups.roof.visible = st.l2 && st.roof; groups.cars.visible = st.cars;
+    groups.l2.visible = st.l2; groups.roof.visible = st.l2 && st.roof; groups.cars.visible = st.cars; groups.night.visible = st.night;
+    document.getElementById('tNight').classList.toggle('on', st.night);
     [['tL2', 'l2'], ['tRoof', 'roof'], ['tCars', 'cars'], ['tLab', 'labels']].forEach(function (p) { document.getElementById(p[0]).classList.toggle('on', st[p[1]]); });
     render();
   }
@@ -358,6 +381,7 @@
     document.getElementById(p[0]).addEventListener('click', function () { st[p[1]] = !st[p[1]]; applyToggles(); });
   });
 
+  document.getElementById('tNight').addEventListener('click', function () { st.night = !st.night; applyToggles(); updateSun(); });
   var mSl = document.getElementById('month'), hSl = document.getElementById('hour');
   mSl.value = st.month; hSl.value = st.hour;
   mSl.addEventListener('input', function () { st.month = +mSl.value; updateSun(); });
