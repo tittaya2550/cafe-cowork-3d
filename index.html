@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>โมเดล 3D คาเฟ่ + Co-working</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="app">
+  <section id="viewport" class="viewport" aria-label="โมเดล 3D ลากเพื่อหมุน">
+    <div id="stage" class="stage"></div>
+    <p class="hint">ลากเพื่อหมุน · เลื่อนล้อเมาส์เพื่อซูม</p>
+  </section>
+
+  <aside class="panel">
+    <header>
+      <p class="eyebrow">โมเดลมวลอาคาร · แปลง 16 × 38 ม.</p>
+      <h1>คาเฟ่ + Co-working<br>สไตล์มินิมอล</h1>
+    </header>
+
+    <div class="group">
+      <h2>มุมมอง</h2>
+      <div class="row" id="views">
+        <button class="btn on" data-view="iso">มุมสูง</button>
+        <button class="btn" data-view="front">จากถนน</button>
+        <button class="btn" data-view="back">ด้านหลัง</button>
+        <button class="btn" data-view="top">ผังบน</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>แสดง</h2>
+      <div class="row">
+        <button class="btn on" id="tUp">ชั้น 2 + หลังคา</button>
+        <button class="btn on" id="tCars">รถยนต์</button>
+        <button class="btn" id="zIn" aria-label="ซูมเข้า">+</button>
+        <button class="btn" id="zOut" aria-label="ซูมออก">−</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>โซน</h2>
+      <div class="lg"><span class="sw" style="background:#9FA4A8"></span>ลานจอด 6 คัน + มอเตอร์ไซค์ · ~224 ตร.ม.</div>
+      <div class="lg"><span class="sw" style="background:#A9C9A4"></span>สวน / ลาน Outdoor / ระยะร่น · ~134 ตร.ม.</div>
+      <div class="lg"><span class="sw" style="background:#9CC3CF"></span>ชั้น 1 คาเฟ่ ผนังกระจก · ~182 ตร.ม.</div>
+      <div class="lg"><span class="sw" style="background:#FAFAF8"></span>ชั้น 2 Co-working · ~182 ตร.ม.</div>
+      <div class="lg"><span class="sw" style="background:#B3865A"></span>ระแนงไม้บังแดดด้านหน้า</div>
+      <div class="lg"><span class="sw" style="background:#2E3D55"></span>แผงโซลาร์บนหลังคา</div>
+      <div class="lg"><span class="sw" style="background:#C9C9C6"></span>Back of house · ~64 ตร.ม.</div>
+    </div>
+
+    <p class="note">โมเดลมวลอาคารเพื่อดูสัดส่วน ไม่ใช่แบบก่อสร้าง ขนาดแปลงเป็นค่าสมมติ ต้องรังวัดจริงก่อนออกแบบ</p>
+  </aside>
+</main>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

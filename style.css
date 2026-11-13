@@ -1,0 +1,20 @@
+body{margin:0;background:#EEF0F1;color:#1C1C1C;font-family:'IBM Plex Sans Thai',system-ui,sans-serif}
+.app{display:flex;flex-wrap:wrap;min-height:100vh}
+.viewport{position:relative;flex:999 1 560px;min-height:640px;overflow:hidden;perspective:2600px;perspective-origin:50% 40%;cursor:grab;touch-action:none;user-select:none}
+.viewport.dragging{cursor:grabbing}
+.stage{position:absolute;left:50%;top:50%;transform-style:preserve-3d;transform-origin:50% 50%}
+.f{position:absolute;transform-origin:0 0;box-sizing:border-box;box-shadow:inset 0 0 0 .6px rgba(0,0,0,.18)}
+.lab{position:absolute;transform-origin:0 0;font-size:12px;font-weight:600;white-space:nowrap;padding:2px 6px;border-radius:3px;color:#1C1C1C;background:rgba(255,255,255,.85)}
+.lab.dark{color:#fff;background:rgba(0,0,0,.35)}
+.hint{position:absolute;left:24px;bottom:12px;font-size:13px;color:#444;margin:0}
+.panel{flex:1 1 320px;max-width:420px;box-sizing:border-box;padding:40px 36px;background:#fff;border-left:1px solid #D4D6D8;display:flex;flex-direction:column;gap:22px}
+.eyebrow{margin:0 0 6px;font-size:13px;letter-spacing:.08em;color:#555}
+h1{margin:0;font-size:26px;font-weight:600;line-height:1.25}
+h2{margin:0 0 10px;font-size:14px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.btn{min-height:44px;padding:0 16px;border:1px solid #1C1C1C;background:#fff;color:#1C1C1C;font:500 14px inherit;font-family:inherit;cursor:pointer;border-radius:4px}
+.btn:hover{background:#EDEDEA}
+.btn.on{background:#1C1C1C;color:#fff}
+.lg{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:10px}
+.sw{width:16px;height:16px;border:1px solid #1C1C1C;flex:none}
+.note{margin-top:auto;font-size:13px;line-height:1.55;color:#555}
