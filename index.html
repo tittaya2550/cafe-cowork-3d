@@ -2,23 +2,35 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>โมเดล 3D คาเฟ่ + Co-working</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1C1C1C">
+<meta name="description" content="โมเดล 3D ผังอาคาร งบประมาณ และแนวทางโครงการคาเฟ่ + ออฟฟิศ 2 ชั้น พิษณุโลก">
+<title>คาเฟ่ + ออฟฟิศ 2 ชั้น พิษณุโลก</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="app">
+<header class="top">
+  <a class="brand" href="#layout">คาเฟ่ + ออฟฟิศ <span>พิษณุโลก</span></a>
+  <nav class="tabs" aria-label="เมนูหลัก">
+    <a href="#layout" data-tab="layout"><b>1</b> ผังอาคาร</a>
+    <a href="#budget" data-tab="budget"><b>2</b> งบลงทุน</a>
+    <a href="#solution" data-tab="solution"><b>3</b> แนวทาง</a>
+  </nav>
+</header>
+
+<!-- ============ 1. LAYOUT ============ -->
+<main class="page app" id="layout">
   <section id="viewport" class="viewport" aria-label="โมเดล 3D ลากเพื่อหมุน">
-    <div id="stage" class="stage"></div>
-    <p class="hint">ลากเพื่อหมุน · เลื่อนล้อเมาส์เพื่อซูม</p>
+    <div id="labels" class="labels"></div>
+    <p class="hint"><span class="mouse">ลากเพื่อหมุน · คลิกขวาลากเพื่อเลื่อน · ล้อเมาส์เพื่อซูม</span><span class="touch">นิ้วเดียวหมุน · สองนิ้วซูมและเลื่อน</span></p>
   </section>
 
   <aside class="panel">
     <header>
-      <p class="eyebrow">โมเดลมวลอาคาร · แปลง 16 × 38 ม.</p>
-      <h1>คาเฟ่ + Co-working<br>สไตล์มินิมอล</h1>
+      <p class="eyebrow">แปลง 16 × 38 ม. (สมมติ) · หน้าแปลงหันทิศเหนือ N18°E</p>
+      <h1>คาเฟ่ + ออฟฟิศ 2 ชั้น<br>สไตล์มินิมอล</h1>
     </header>
 
     <div class="group">
@@ -26,36 +38,142 @@
       <div class="row" id="views">
         <button class="btn on" data-view="iso">มุมสูง</button>
         <button class="btn" data-view="front">จากถนน</button>
+        <button class="btn" data-view="west">ด้านตะวันตก</button>
         <button class="btn" data-view="back">ด้านหลัง</button>
         <button class="btn" data-view="top">ผังบน</button>
+        <button class="btn" data-view="plan1">ผังชั้น 1</button>
+        <button class="btn" data-view="plan2">ผังชั้น 2</button>
       </div>
     </div>
 
     <div class="group">
       <h2>แสดง</h2>
       <div class="row">
-        <button class="btn on" id="tUp">ชั้น 2 + หลังคา</button>
+        <button class="btn on" id="tRoof">หลังคา</button>
+        <button class="btn on" id="tL2">ชั้น 2</button>
         <button class="btn on" id="tCars">รถยนต์</button>
-        <button class="btn" id="zIn" aria-label="ซูมเข้า">+</button>
-        <button class="btn" id="zOut" aria-label="ซูมออก">−</button>
+        <button class="btn on" id="tLab">ป้ายชื่อ</button>
       </div>
     </div>
 
     <div class="group">
-      <h2>โซน</h2>
-      <div class="lg"><span class="sw" style="background:#9FA4A8"></span>ลานจอด 6 คัน + มอเตอร์ไซค์ · ~224 ตร.ม.</div>
-      <div class="lg"><span class="sw" style="background:#A9C9A4"></span>สวน / ลาน Outdoor / ระยะร่น · ~134 ตร.ม.</div>
-      <div class="lg"><span class="sw" style="background:#9CC3CF"></span>ชั้น 1 คาเฟ่ ผนังกระจก · ~182 ตร.ม.</div>
-      <div class="lg"><span class="sw" style="background:#FAFAF8"></span>ชั้น 2 Co-working · ~182 ตร.ม.</div>
-      <div class="lg"><span class="sw" style="background:#B3865A"></span>ระแนงไม้บังแดดด้านหน้า</div>
-      <div class="lg"><span class="sw" style="background:#2E3D55"></span>แผงโซลาร์บนหลังคา</div>
-      <div class="lg"><span class="sw" style="background:#C9C9C6"></span>Back of house · ~64 ตร.ม.</div>
+      <h2>แสงแดดจริงตามพิกัด 16.7672°N 100.2714°E</h2>
+      <label class="sl"><span>วันที่ <b id="monthOut"></b></span><input type="range" id="month" min="1" max="12" step="1"></label>
+      <label class="sl"><span>เวลา <b id="hourOut"></b></span><input type="range" id="hour" min="6" max="18.5" step="0.25"></label>
+      <div class="row" id="presets">
+        <button class="btn sm" data-hour="8">เช้า 8:00</button>
+        <button class="btn sm" data-hour="12">เที่ยง</button>
+        <button class="btn sm" data-hour="15.5">บ่าย 15:30</button>
+        <button class="btn sm" data-hour="17.25">เย็น 17:15</button>
+      </div>
+      <p class="out" id="sunOut"></p>
     </div>
 
-    <p class="note">โมเดลมวลอาคารเพื่อดูสัดส่วน ไม่ใช่แบบก่อสร้าง ขนาดแปลงเป็นค่าสมมติ ต้องรังวัดจริงก่อนออกแบบ</p>
+    <div class="group">
+      <h2>ชั้น 1 · คาเฟ่ 182 ตร.ม.</h2>
+      <div id="zones1"></div>
+    </div>
+
+    <div class="group">
+      <h2>ชั้น 2 · ออฟฟิศบริษัท 182 ตร.ม.</h2>
+      <div id="rooms"></div>
+    </div>
+
+    <a class="next" href="#budget">ถัดไป: งบลงทุน →</a>
   </aside>
 </main>
+
+<!-- ============ 2. BUDGET ============ -->
+<main class="page doc" id="budget" hidden>
+  <p class="eyebrow">2 · งบลงทุน</p>
+  <h1>งบลงทุน เรียงตามความจำเป็น</h1>
+  <p class="lead">แบ่งเป็น 3 กลุ่มเพื่อให้เห็นว่าต้องใช้เงินขั้นต่ำเท่าไรจึงเปิดร้านได้ และส่วนไหนทยอยทำทีหลังได้ ตัวเลขเป็นช่วงประมาณการ หน่วยล้านบาท ไม่รวมที่ดินและ VAT</p>
+  <div class="cards" id="budgetCards"></div>
+  <div id="cost"></div>
+  <p class="note">ราคาต่อหน่วยเป็นช่วงประมาณการสำหรับงานก่อสร้างต่างจังหวัด ยังไม่ใช่ใบเสนอราคา รายการถมดินเป็นค่าสมมติเพราะยังไม่ทราบระดับดินจริง ค่าออกแบบและเงินสำรองคิดเป็นสัดส่วนของแต่ละกลุ่ม</p>
+  <a class="next" href="#solution">ถัดไป: แนวทางโครงการ →</a>
+</main>
+
+<!-- ============ 3. SOLUTION ============ -->
+<main class="page doc" id="solution" hidden>
+  <p class="eyebrow">3 · แนวทาง</p>
+  <h1>แนวทางโครงการ</h1>
+  <p class="lead">อาคาร 2 ชั้นบนที่ดิน 151 ตร.ว. ต.อรัญญิก อ.เมืองพิษณุโลก ชั้นล่างเป็นคาเฟ่ ชั้นบนเป็นออฟฟิศบริษัท ใช้ที่จอดและงานระบบร่วมกัน</p>
+
+  <div class="cards">
+    <div class="card"><p class="k">ที่ดิน</p><p class="v">604<small> ตร.ม.</small></p><p class="s">0-1-51 ไร่ · 151 ตร.ว.</p></div>
+    <div class="card"><p class="k">พื้นที่อาคาร</p><p class="v">364<small> ตร.ม.</small></p><p class="s">2 ชั้น ชั้นละ 182 ตร.ม.</p></div>
+    <div class="card"><p class="k">ที่นั่งคาเฟ่</p><p class="v">33 + 12</p><p class="s">ในร้าน + ลานกลางแจ้ง</p></div>
+    <div class="card"><p class="k">ที่จอด</p><p class="v">6<small> คัน</small></p><p class="s">รวมผู้พิการ 1 · มอเตอร์ไซค์ 7 ช่อง</p></div>
+  </div>
+
+  <h2>ลำดับการลงทุน</h2>
+  <ol class="steps">
+    <li><span class="tag">1</span><div><h3>เปิดร้านให้ได้ก่อน <em id="ph1"></em> <small>ล้านบาท</small></h3><p>โครงสร้างอาคารทั้ง 2 ชั้น งานระบบ แอร์ ตกแต่งคาเฟ่ อุปกรณ์ ลานจอด และป้ายร้าน โครงสร้างต้องทำครบทั้งอาคารในครั้งเดียว แยกสร้างทีละชั้นไม่ได้</p></div></li>
+    <li><span class="tag">2</span><div><h3>ใช้งานครบทั้งอาคาร <em id="ph2"></em> <small>ล้านบาท</small></h3><p>ตกแต่งออฟฟิศชั้น 2 ระแนงบังแดดทิศตะวันตก และรั้วรอบแปลง ระแนงควรทำพร้อมโครงสร้างเพราะติดตั้งทีหลังต้องตั้งนั่งร้านใหม่</p></div></li>
+    <li><span class="tag">3</span><div><h3>เสริมภายหลัง <em id="ph3"></em> <small>ล้านบาท</small></h3><p>ลานไม้กลางแจ้ง จัดสวน และโซลาร์บนหลังคา ทำหลังเปิดร้านได้โดยไม่ต้องปิดกิจการ</p></div></li>
+  </ol>
+
+  <h2>ทำไมผังเป็นแบบนี้</h2>
+  <ul class="why">
+    <li><h3>หันกระจกรับแสงเหนือ</h3><p>หน้าแปลงหันทิศเหนือ กระจกบานใหญ่ด้านหน้าจึงได้แสงสว่างโดยไม่โดนแดดตรงเกือบทั้งปี ลดภาระแอร์และไม่ต้องปิดม่าน</p></li>
+    <li><h3>ปิดด้านตะวันตก</h3><p>แดดบ่ายเข้าทางตะวันตก ด้านนี้จึงเป็นผนังทึบพร้อมระแนงไม้ และวางบันไดกับส่วนบริการไว้เป็นกันชนความร้อน</p></li>
+    <li><h3>คาเฟ่ตามสัดส่วนร้านกาแฟ</h3><p>ที่นั่ง 59% บาร์และครัว 24% ห้องน้ำ บันได และโถงทางเข้าออฟฟิศ 17% บาร์หันเข้าหาประตู ลูกค้าเห็นจุดสั่งทันทีที่เดินเข้า</p></li>
+    <li><h3>ออฟฟิศแยกทางเข้า</h3><p>บันไดขึ้นชั้น 2 มีประตูคีย์การ์ดแยกจากคาเฟ่ ชั้นบนมีโต๊ะทำงานริมกระจก 8 ที่ โซนระดมความคิด ห้องประชุม 8 ที่นั่ง ห้องผู้บริหาร และห้องนอน 1 ห้อง</p></li>
+    <li><h3>จอดรถหน้าร้าน</h3><p>ลานจอดอยู่ติดถนน มองเห็นจากรถ ลานนั่งกลางแจ้งคั่นระหว่างลานจอดกับตัวร้าน</p></li>
+  </ul>
+
+  <h2>การใช้งานที่ตรวจครบแล้ว</h2>
+  <ul class="todo done">
+    <li>ทางขึ้นดาดฟ้าด้วยบันไดหลัก มีห้องคลุมบันได ราวกันตก และทางเดินซ่อมบำรุงไปถึงแผงโซลาร์กับถังน้ำ</li>
+    <li>ออฟฟิศมีประตูเข้าจากด้านข้างอาคารโดยตรง เข้าออกได้แม้คาเฟ่ปิด และล็อกแยกจากคาเฟ่ได้</li>
+    <li>ทางลาดรถเข็นจากลานจอดขึ้นลานหน้าร้าน ที่จอดผู้พิการ และห้องน้ำผู้พิการที่ชั้น 1</li>
+    <li>ส่วนบริการหลังร้าน: ที่พักขยะมีผนังกั้น ถังเก็บน้ำพร้อมปั๊ม ถังดักไขมัน ถังบำบัดน้ำเสีย คอมเพรสเซอร์แอร์ ตู้มิเตอร์ไฟฟ้า</li>
+    <li>ถังดับเพลิงทุกชั้นรวมดาดฟ้า</li>
+    <li>ชั้น 2 มีห้องคุยโทรศัพท์ ตู้เซิร์ฟเวอร์และที่เก็บของ แยกจากโซนระดมความคิดที่ใช้เสียง</li>
+  </ul>
+
+  <h2>สิ่งที่ยังต้องยืนยัน</h2>
+  <ul class="todo">
+    <li>ขนาดและรูปแปลงจริงจากโฉนดหรือผลรังวัด (ตอนนี้สมมติ 16 × 38 ม.)</li>
+    <li>ระยะร่น อัตราส่วนพื้นที่ และจำนวนที่จอดขั้นต่ำตามผังเมืองพิษณุโลกและข้อบัญญัติท้องถิ่น</li>
+    <li>ระดับดินเดิมและปริมาณดินถม</li>
+    <li>อาคารมีบันไดเดียวและไม่มีลิฟต์ ต้องให้สถาปนิกตรวจกับกฎหมายควบคุมอาคารและข้อกำหนดผู้พิการว่าเพียงพอหรือไม่ (ลิฟต์เล็ก 1 ตัวเพิ่มงบราว 0.8–1.2 ล้านบาท)</li>
+    <li>ที่จอด 6 คันรองรับลูกค้า 33 ที่นั่งและพนักงานออฟฟิศ 8–13 คนได้จำกัด อาจต้องหาที่จอดเสริม</li>
+    <li>ทางส่งของเข้าหลังร้านกว้าง 1 ม. ใช้รถเข็นได้ รถยนต์เข้าไม่ได้</li>
+    <li>ใบเสนอราคาจากผู้รับเหมาอย่างน้อย 2 ราย เพื่อแทนช่วงประมาณการ</li>
+    <li>ประมาณการรายได้และระยะคืนทุน ยังไม่ได้ทำในเอกสารนี้</li>
+  </ul>
+
+  <div class="cards two">
+    <div class="card t1"><p class="k">ขั้นต่ำเพื่อเปิดร้าน</p><p class="v"><span id="kMust"></span><small> ล้านบาท</small></p></div>
+    <div class="card t3"><p class="k">ครบตามแบบ</p><p class="v"><span id="kFull"></span><small> ล้านบาท</small></p></div>
+  </div>
+  <p class="note">โมเดลเพื่อศึกษาสัดส่วน แสง และงบเบื้องต้น ไม่ใช่แบบก่อสร้าง ทิศแปลงวัดจากภาพดาวเทียม</p>
+  <a class="next" href="#layout">← กลับไปดูผังอาคาร</a>
+</main>
+
+<script>
+// tiny hash router: #layout | #budget | #solution
+(function () {
+  var pages = ['layout', 'budget', 'solution'];
+  function go() {
+    var id = location.hash.slice(1); if (pages.indexOf(id) < 0) id = 'layout';
+    pages.forEach(function (p) { document.getElementById(p).hidden = p !== id; });
+    document.querySelectorAll('.tabs a').forEach(function (a) { a.classList.toggle('on', a.dataset.tab === id); });
+    window.scrollTo(0, 0);
+    window.dispatchEvent(new Event('resize'));
+  }
+  window.addEventListener('hashchange', go); go();
+})();
+</script>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/RoundedBoxGeometry.js"></script>
+<script src="sun.js"></script>
 <script src="model.js"></script>
+<script src="props.js"></script>
 <script src="app.js"></script>
+<script src="cost.js"></script>
 </body>
 </html>
